@@ -3,10 +3,11 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include <string>
 #include <windows.h>
 #include <vector>
 #include <unordered_map>
-
+#include <thread>         // std::thread
 
 using namespace std;
 
@@ -71,7 +72,7 @@ void WinApiData::getChildWindowData(void)
         vector <HWND> childWinList;
         childWindowsHmap.insert({ parentHandl, childWinList });
         EnumChildWindows(parentHandl, enumChildProczzz, NULL);
-        cout << "  EnumChildWindows(parentHandl, enumChildProczzz, NULL)" << endl;
+        wcout << "  EnumChildWindows(parentHandl, enumChildProczzz, NULL)" << endl;
     }
 }
 
@@ -138,18 +139,36 @@ wstring WinApiData::getWindowTitle(HWND whdl)
 
 void WinApiData::shwoMe(void)
 {
-
-    cout << "list size is " << winhandlelist.size() << endl;
+    int count = 0;
+    wcout << "list size is " << winhandlelist.size() << endl;
     for (auto item : winhandlelist)
     {
-        wstring title = getWindowTitle(item);
-        int len = title.size();
-        string isIcon = IsIconic(item) ? " iconic " : " ";
-        if (len > 0)
+       // wcout << "count: " << count++ << " ";
+        if (count == 25)
         {
-            wcout << item << " : " << isIcon.c_str() << " " << title.c_str() << endl << endl;
+        //    wcout << "count ==25" << endl;
+        }
+        wstring title = getWindowTitle(item);
+
+        //wcout << item << "line 151!! : " << endl;
+
+        std::wstring::size_type found = title.find(L"°Ù¶È");
+        if (found != std::wstring::npos)
+        {
+            wcout << found << " ";
+            wcout << "!!!!!! found !!!!" << item << " " << title << endl;
+        }
+        
+
+        //int len = title.size();
+        //string isIcon = IsIconic(item) ? " iconic " : " no icon ";
+        //if (len > 0)
+        {
+            //wcout << item << "line 151 : " << isIcon.c_str() << " " << title.c_str() << endl;
+            //wcout << item << "line 151!! : " << endl;
         }
     }
+    wcout.flush();
 }
 
 
@@ -158,6 +177,8 @@ BOOL CALLBACK enumWindowsProczzz(__in   HWND hWnd, __in  LPARAM lParam)
 {
 
     winData.addWInHdl(hWnd);
+
+    //wcout << "adding hWnd" << endl;
     /**/
     /*if (!  IsIconic(hWnd)) {
         return TRUE;
@@ -191,9 +212,9 @@ void testEnumWIndows()
 
     BOOL result = EnumWindows(enumWindowsProczzz, NULL);
 
-    cout << "     BOOL result = EnumWindows(enumWindowsProczzz, NULL) " << endl;
+    wcout << "     BOOL result = EnumWindows(enumWindowsProczzz, NULL) " << endl;
 
-    //winData.shwoMe();
+   // winData.shwoMe();
 
 
 
@@ -204,15 +225,24 @@ void testEnumWIndows()
 
 int main()
 {
+    // important: otherwise can not output or output end prematurely
+    locale loc("chs");
+    
+    wcout.imbue(loc);
+
+    //std::thread first(testEnumWIndows);
 
     // EnumChildWindows
     testEnumWIndows();
 
+  
+
+    //winData.shwoMe();
     cin.get();
 
     winData.shwoMe();
-    cin.get();
 
+    cin.get();
     return 0;
 }
 
