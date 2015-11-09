@@ -1,4 +1,4 @@
-// mouseEvent.cpp : Defines the entry point for the console application.
+﻿// mouseEvent.cpp : Defines the entry point for the console application.
 //
 
 #include "stdafx.h"
@@ -55,6 +55,7 @@ private:
     void mouseClickRight(tagPOINT point);
 
 public: BaiduAuto();
+        bool init(void);
         //for main win
         static BOOL CALLBACK enumWindowsProczzz(__in   HWND hWnd, __in  LPARAM lParam);
         //for child win
@@ -68,13 +69,16 @@ public: BaiduAuto();
         void enableFastSpeed(void);
 };
 
-const wstring BaiduAuto::BaiDuWinTitle = L"��ӭʹ�ðٶ�";
+const wstring BaiduAuto::BaiDuWinTitle = L"欢迎使用百度";
 HWND BaiduAuto::m_baiduWinHandle;
 
 
 
 void BaiduAuto::enableFastSpeed(void)
 {
+    //the window is not found! maybe the app is not running
+    if (m_baiduWinHandle == 0) return;
+
     mouseClickRight(m_tryFastButton);
 }
 
@@ -143,16 +147,33 @@ HWND BaiduAuto::getBaiduWinHandle(void)
     return m_baiduWinHandle;
 }
 
-void BaiduAuto::showBaiduCloudWin(void)
+
+bool BaiduAuto::init(void)
 {
-    // 1 get baidu handle
     getBaiduWinHandle();
 
     //now m_baiduWinHandle = the id;
 
     // 2 show the window
+    //the window is not found! maybe the app is not running
+    if (m_baiduWinHandle == 0) return false;
 
+    return true;
+
+}
+
+void BaiduAuto::showBaiduCloudWin(void)
+{
+    // 1 get baidu handle
+   // getBaiduWinHandle();
+
+    //now m_baiduWinHandle = the id;
+
+    // 2 show the window
+    //the window is not found! maybe the app is not running
+    if (m_baiduWinHandle == 0) return;
     // SW_SHOW |
+
     ShowWindow(m_baiduWinHandle, SW_RESTORE);
     std::this_thread::sleep_for(1s);
 
@@ -168,6 +189,9 @@ void BaiduAuto::showBaiduCloudWin(void)
 
 void BaiduAuto::openTransferWindow(void)
 {
+    //the window is not found! maybe the app is not running
+    if (m_baiduWinHandle == 0) return;
+
     mouseClickRight(this->m_transferButton);
     std::this_thread::sleep_for(2s);
 
@@ -177,6 +201,8 @@ void BaiduAuto::openTransferWindow(void)
 
 void mouseClickTransferList()
 {
+
+
     const int ButtonX = 1242;
     const int ButtonY = 295;
 
@@ -283,8 +309,17 @@ int main()
     //return 1;
 
     BaiduAuto *myBaiduAutop = new BaiduAuto();
+
+    bool success = myBaiduAutop->init();
+    if (!success) {
+        wcout << "Baidu App is not running" << endl;
+        cin.get();
+
+        return 1;
+    }
+
     myBaiduAutop->showBaiduCloudWin();
-    
+
 
     myBaiduAutop->openTransferWindow();
 
