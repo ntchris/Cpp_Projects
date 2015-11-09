@@ -55,22 +55,22 @@ private:
     void mouseClickRight(tagPOINT point);
 
 public: BaiduAuto();
-        bool init(void);
+        bool init(wstring wintitle);
         //for main win
         static BOOL CALLBACK enumWindowsProczzz(__in   HWND hWnd, __in  LPARAM lParam);
         //for child win
         static BOOL CALLBACK enumChildProczzz(__in  HWND childWinId, __in  LPARAM parentId);
 
         void showBaiduCloudWin(void);
-        HWND getBaiduWinHandle(void);
+        HWND getWinHandleByTitle(wstring wintitle);
 
 
         void openTransferWindow(void);
         void enableFastSpeed(void);
 };
 
-const wstring BaiduAuto::BaiDuWinTitle = L"欢迎使用百度";
-HWND BaiduAuto::m_baiduWinHandle;
+//const wstring BaiduAuto::BaiDuWinTitle = L"欢迎使用百度";
+HWND BaiduAuto::m_baiduWinHandle = NULL;
 
 
 
@@ -99,7 +99,8 @@ BOOL CALLBACK BaiduAuto::enumWindowsProczzz(__in   HWND hWnd, __in  LPARAM lPara
 {
 
     wstring title = getWindowTitle(hWnd);
-    if (title.find(BaiDuWinTitle) != std::wstring::npos)
+    wstring *targetTitle = (wstring*)lParam;
+    if (title.find(*targetTitle) != std::wstring::npos)
     {
         EnumChildWindows(hWnd, enumChildProczzz, (LPARAM)hWnd);
         return false;
@@ -138,27 +139,53 @@ BOOL CALLBACK BaiduAuto::enumChildProczzz(__in  HWND childWinId, __in  LPARAM pa
 
 }
 
-
-
-
-HWND BaiduAuto::getBaiduWinHandle(void)
+void sleep(void)
 {
-    BOOL result = EnumWindows(enumWindowsProczzz, NULL);
+    std::this_thread::sleep_for(2s);
+}
+
+
+HWND BaiduAuto::getWinHandleByTitle(wstring wintitle)
+{
+    BOOL result;
+
+    EnumWindows(enumWindowsProczzz, (LPARAM)&wintitle);
+    if (m_baiduWinHandle == NULL)
+    {
+        wcout << " getWinHandleByTitle(wstring wintitle) , m_baiduWinHandle == NULL" << endl;
+        std::this_thread::sleep_for(1s);
+    }
+
     return m_baiduWinHandle;
 }
 
 
-bool BaiduAuto::init(void)
+bool BaiduAuto::init(wstring wintitle)
 {
-    getBaiduWinHandle();
+    const int MaxAttempt = 10;
+    for (int i = 0; i < MaxAttempt; i++)
+    {
 
-    //now m_baiduWinHandle = the id;
+        m_baiduWinHandle = BaiduAuto::getWinHandleByTitle(wintitle);
+        if (m_baiduWinHandle != 0)
+        {
+            wcout << " found ! " << endl;
+            break;
+        }
+        else {
+            wcout << " not found ??? try again" << endl;
+        }
 
-    // 2 show the window
-    //the window is not found! maybe the app is not running
-    if (m_baiduWinHandle == 0) return false;
+    }
 
-    return true;
+    if (m_baiduWinHandle == 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 
 }
 
@@ -195,27 +222,6 @@ void BaiduAuto::openTransferWindow(void)
     mouseClickRight(this->m_transferButton);
     std::this_thread::sleep_for(2s);
 
-}
-
-
-
-void mouseClickTransferList()
-{
-
-
-    const int ButtonX = 1242;
-    const int ButtonY = 295;
-
-    const int mousex = (int)(65536.0 / 1680 * ButtonX - 1); //convert to absolute coordinates
-    const int mousey = (int)(65536.0 / 1050 * ButtonY - 1);
-
-    mouse_event(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE, mousex, mousey, 0, 0);
-
-    mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_ABSOLUTE, mousex, mousey, 0, 0);
-    mouse_event(MOUSEEVENTF_LEFTUP | MOUSEEVENTF_ABSOLUTE, mousex, mousey, 0, 0);
-
-    //mouse_event(MOUSEEVENTF_LEFTDOWN, ButtonX, ButtonY, 0, 0);
-    //mouse_event(MOUSEEVENTF_LEFTUP, ButtonX, ButtonY, 0, 0);
 }
 
 
@@ -301,6 +307,8 @@ void loopGetMouseXY()
 int main()
 {
 
+    const wstring BaiDuWinTitle = L"欢迎使用百度";
+    //const wstring BaiDuWinTitle = L"foobar";
 
     locale loc("chs");
 
@@ -310,13 +318,18 @@ int main()
 
     BaiduAuto *myBaiduAutop = new BaiduAuto();
 
-    bool success = myBaiduAutop->init();
+    bool success = myBaiduAutop->init(BaiDuWinTitle);
+
+
+
     if (!success) {
-        wcout << "Baidu App is not running" << endl;
+        wcout << BaiDuWinTitle << " App is not running?" << endl;
         cin.get();
 
         return 1;
     }
+
+
 
     myBaiduAutop->showBaiduCloudWin();
 
@@ -324,6 +337,7 @@ int main()
     myBaiduAutop->openTransferWindow();
 
     myBaiduAutop->enableFastSpeed();
+
     cin.get();
 
     return 0;
