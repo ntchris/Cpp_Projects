@@ -88,8 +88,10 @@ void BaiduAuto::mouseClickRight(tagPOINT point)
     const int mousey = (int)(65536.0 / 1050 * point.y - 1);
 
     mouse_event(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE, mousex, mousey, 0, 0);
+    std::this_thread::sleep_for(1s);
 
     mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_ABSOLUTE, mousex, mousey, 0, 0);
+    std::this_thread::sleep_for(200ms);
     mouse_event(MOUSEEVENTF_LEFTUP | MOUSEEVENTF_ABSOLUTE, mousex, mousey, 0, 0);
 }
 
@@ -130,9 +132,6 @@ BaiduAuto::BaiduAuto()
 BOOL CALLBACK BaiduAuto::enumChildProczzz(__in  HWND childWinId, __in  LPARAM parentId)
 {
     HWND pid = (HWND)parentId;
-
-
-    //make a new child list if it's not there yet
 
     m_baiduWinHandle = pid;
     return false;
@@ -306,7 +305,6 @@ void loopGetMouseXY()
 
 int main()
 {
-
     const wstring BaiDuWinTitle = L"欢迎使用百度";
     //const wstring BaiDuWinTitle = L"foobar";
 
@@ -320,8 +318,6 @@ int main()
 
     bool success = myBaiduAutop->init(BaiDuWinTitle);
 
-
-
     if (!success) {
         wcout << BaiDuWinTitle << " App is not running?" << endl;
         cin.get();
@@ -329,10 +325,7 @@ int main()
         return 1;
     }
 
-
-
     myBaiduAutop->showBaiduCloudWin();
-
 
     myBaiduAutop->openTransferWindow();
 
