@@ -40,53 +40,90 @@ BOOL CALLBACK EnumChildProc(
     */
 
 
+    //BOOL CALLBACK  enumChildProczzz(__in  HWND hwnd, __in  LPARAM lParam);
 
 
 class WinApiData {
     int i;
     std::vector <HWND> winhandlelist;
-    unordered_map <HWND, vector<HWND> > childWindowsHmap;
+
+    unordered_map <HWND, vector<HWND> *  > childWindowsHmap;
+    //unordered_map <HWND,   HWND  > childWindowsHmap;
+
+public:
 
     void getChildWindowData(void);
 
-public:
     void addWInHdl(HWND hdl);
     void showWindowTitle(HWND hdl);
-    wstring getWindowTitle(HWND whdl);
     void showChildWindows();
     void shwoMe(void);
+
+    void addChildWinTo(HWND parentId);
+
+    static BOOL CALLBACK enumChildProczzz(__in  HWND hwnd, __in  LPARAM lParam);
+    static   wstring getWindowTitle(HWND whdl);
+
 } winData;
 
 
 
-
-BOOL CALLBACK enumChildProczzz(__in  HWND hwnd, __in  LPARAM lParam)
+BOOL  CALLBACK     WinApiData::enumChildProczzz(__in  HWND childWinId, __in  LPARAM parentId)
 {
+    HWND pid = (HWND)parentId;
+    auto mypair = (winData.childWindowsHmap).find(pid);
+
+    if (mypair == winData.childWindowsHmap.end())
+    {
+        //make a new child list if it's not there yet
+        std::pair <HWND, vector<HWND> * >  newHashMapItem; //  parentID, childList
+        vector<HWND> *childWinList_p = new vector<HWND>;
+        newHashMapItem.first = (HWND)parentId;
+        newHashMapItem.second = childWinList_p;
+        childWinList_p->push_back(childWinId);
+        winData.childWindowsHmap.insert(newHashMapItem);
+
+        return true;
+    }
+    else
+    {
+        //get the vector of child win and add the new one
+        mypair->second->push_back(childWinId);
+
+    }
 
     return true;
 }
+
+
+
+//"BOOL (__stdcall WinApiData::*)(HWND hwnd, LPARAM lParam)" is incompatible with parameter of type "WNDENUMPROC"	windowsApiTest	h : \GitHubRoot\Cpp_Projects\windowsApiTest\windowsApiTest\windowsApiTest.cpp	101
+
+ //   typedef BOOL(*WNDENUMPROC)(HWND, LPARAM)
 void WinApiData::getChildWindowData(void)
 {
+    // iterate the current stored win(main windows) list
     for (auto parentHandl : winhandlelist)
     {
-        vector <HWND> childWinList;
-        childWindowsHmap.insert({ parentHandl, childWinList });
-        EnumChildWindows(parentHandl, enumChildProczzz, NULL);
-        wcout << "  EnumChildWindows(parentHandl, enumChildProczzz, NULL)" << endl;
+
+
+        vector <HWND> *childWinListp = new  vector <HWND>;
+
+        LPARAM lparam = (LPARAM)parentHandl;
+
+        wstring title = WinApiData::getWindowTitle(parentHandl);
+
+        //if (title.find(L"百度") != std::wstring::npos)
+         //wcout << "  EnumChildWindows(parentHandl, enumChildProczzz, aaa)" << parentId << endl;
+        EnumChildWindows(parentHandl, enumChildProczzz, lparam);
+         
     }
+
 }
 
+///    BOOL result = EnumWindows(enumWindowsProczzz, NULL);
 
-/*
-void WinApiData::showChildWindows()
-{
-    for (auto item : winhandlelist)
-    {
-        bool result = EnumChildWindows(item, );
-    }
-}
 
-*/
 
 
 void WinApiData::addWInHdl(HWND hdl)
@@ -141,63 +178,36 @@ void WinApiData::shwoMe(void)
 {
     int count = 0;
     wcout << "list size is " << winhandlelist.size() << endl;
-    for (auto item : winhandlelist)
+    for (auto parentID : winhandlelist)
     {
-       // wcout << "count: " << count++ << " ";
-        if (count == 25)
-        {
-        //    wcout << "count ==25" << endl;
-        }
-        wstring title = getWindowTitle(item);
+        wstring title = WinApiData::getWindowTitle(parentID);
+        //deal with child windows
 
-        //wcout << item << "line 151!! : " << endl;
-
-        std::wstring::size_type found = title.find(L"百度");
-        if (found != std::wstring::npos)
+        auto childInfoPair = this->childWindowsHmap.find(parentID);
+        if (childInfoPair != childWindowsHmap.end())
         {
-            wcout << found << " ";
-            wcout << "!!!!!! found !!!!" << item << " " << title << endl;
-        }
-        
+            auto childList = childInfoPair->second;
+            for (auto childId : *childList)
+            {
+                // note :  not all main window has child win/ or in the hashmap
+                wstring title = WinApiData::getWindowTitle(childId);
 
-        //int len = title.size();
-        //string isIcon = IsIconic(item) ? " iconic " : " no icon ";
-        //if (len > 0)
-        {
-            //wcout << item << "line 151 : " << isIcon.c_str() << " " << title.c_str() << endl;
-            //wcout << item << "line 151!! : " << endl;
+                wcout << "Child Win is " << childId << " !!" << title << " !! "<<endl;
+            }
         }
     }
-    wcout.flush();
+
 }
 
 
 
 BOOL CALLBACK enumWindowsProczzz(__in   HWND hWnd, __in  LPARAM lParam)
 {
-
-    winData.addWInHdl(hWnd);
-
-    //wcout << "adding hWnd" << endl;
-    /**/
-    /*if (!  IsIconic(hWnd)) {
-        return TRUE;
+    wstring title = WinApiData::getWindowTitle(hWnd);
+    if (title.find(L"百度") != std::wstring::npos)
+    {
+        winData.addWInHdl(hWnd);
     }
-    
-     
-    int length = GetWindowTextLength(hWnd);
-    //if (0 == length) return TRUE;
-
-    WCHAR*  buffer;
-    buffer = new WCHAR[length + 1];
-    memset(buffer, 0, (length + 1) * sizeof(TCHAR));
-
-    GetWindowText(hWnd, buffer, length + 1);
-
-
-    wcout << hWnd << TEXT(": ") << buffer << std::endl;
-    delete[] buffer;
-     */
     return true;
 }
 
@@ -214,7 +224,11 @@ void testEnumWIndows()
 
     wcout << "     BOOL result = EnumWindows(enumWindowsProczzz, NULL) " << endl;
 
-   // winData.shwoMe();
+    winData.getChildWindowData();
+
+
+    winData.shwoMe();
+
 
 
 
@@ -227,7 +241,7 @@ int main()
 {
     // important: otherwise can not output or output end prematurely
     locale loc("chs");
-    
+
     wcout.imbue(loc);
 
     //std::thread first(testEnumWIndows);
@@ -235,12 +249,11 @@ int main()
     // EnumChildWindows
     testEnumWIndows();
 
-  
+
 
     //winData.shwoMe();
-    cin.get();
 
-    winData.shwoMe();
+
 
     cin.get();
     return 0;
