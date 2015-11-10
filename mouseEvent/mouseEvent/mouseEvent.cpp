@@ -1,4 +1,4 @@
-﻿// mouseEvent.cpp : Defines the entry point for the console application.
+// mouseEvent.cpp : Defines the entry point for the console application.
 //
 
 #include "stdafx.h"
@@ -146,8 +146,7 @@ void sleep(void)
 
 HWND BaiduAuto::getWinHandleByTitle(wstring wintitle)
 {
-    BOOL result;
-
+  
     EnumWindows(enumWindowsProczzz, (LPARAM)&wintitle);
     if (m_baiduWinHandle == NULL)
     {
@@ -320,7 +319,7 @@ int main()
 
     if (!success) {
         wcout << BaiDuWinTitle << " App is not running?" << endl;
-        cin.get();
+        //cin.get();
 
         return 1;
     }
@@ -331,7 +330,7 @@ int main()
 
     myBaiduAutop->enableFastSpeed();
 
-    cin.get();
+   
 
     return 0;
 }
