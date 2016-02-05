@@ -16,9 +16,10 @@
 
 using namespace std;
 
-const   long MB1 = 1024 * 1024;
+const long long MB1 = 1024 * 1024;
+const long long MB10 = 10 * MB1;
+const long long MB100 = 100 * MB1;
 
-const   long MB100 = 100 * MB1;
 
 int copyFile(string origFile, string destFile)
 {
@@ -75,52 +76,167 @@ int copyFile(string origFile, string destFile)
     return 0;
 }
 
-struct ContentBlock 
+struct DataBlock
 {
     long long start, len;
 };
 
 
-std::vector<ContentBlock> *  analyzeDiskImageFile(string imgfile)
-{ 
-    std::vector<ContentBlock> *result = new std::vector<ContentBlock>();
-    
 
-    //ContentBlock *block;
-    ContentBlock block;
-    int i;
-    for (i = 0; i < 5; i++)
+
+bool isBufferAllZero(char *buffer, long long size)
+{
+   if(buffer) return true;
+   for(int i=0;i<size;i++)
+   {
+      if(buffer[i]!=0)
+      {
+         //it's not zero, immediately return false
+         return false;
+      }
+   }
+   return true;
+}
+
+// find and return the start/end address of the next data block
+DataBlock * findDataBlock(FILE*fp, const long long start, const long long totalFileSize)
+{
+   long long stepSize = 30 * MB1;
+   char *buffer = new char[stepSize];
+   DataBlock *datablock=new DataBlock();
+
+   long long doneAddress= start;
+   _fseeki64(fp, start, SEEK_SET);
+
+   // Step 1 find the start address of the data block
+   do {
+      long long readSize;
+
+      if ((doneAddress + stepSize)> totalFileSize)
+      {   // only has a little left, just read what's left
+         readSize = totalFileSize - doneAddress;
+      }
+      else
+      {  //still have a lot of to read, read the full step size
+         readSize = stepSize;
+      }
+
+      fread(buffer, readSize, 1, fp);
+      if (!isBufferAllZero(buffer, readSize))
+      {
+         //it has content in this block, record the start address and stop searching
+         datablock->start = doneAddress;
+         //record the doneSize for next step
+         doneAddress +=readSize;
+         break;
+      }
+
+      doneAddress += readSize;
+
+   } while (doneAddress < totalFileSize);
+
+   // Step 2 find the end address of the data block
+   do {
+      long long readSize;
+
+      if ((doneAddress + stepSize)> totalFileSize)
+      {   // only has a little left, just read what's left
+         readSize = totalFileSize - doneAddress;
+      }
+      else
+      {  //still have a lot of to read, read the full step size
+         readSize = stepSize;
+      }
+
+      fread(buffer, readSize, 1, fp);
+      if (isBufferAllZero(buffer, readSize))
+      {
+         //it is all zero in this block, meaning the starting address is the end of the data block. 
+         datablock->len = doneAddress- start;
+         break;
+      }
+
+      doneAddress += readSize;
+
+   }while (doneAddress < totalFileSize);
+
+   delete buffer; 
+   return datablock;   
+}
+
+std::vector<DataBlock> *  analyzeDiskImageFile(string imgfile)
+{
+    // DD first block: 0 to 100 MB, do not analyze if it's empty or not, just write this block to emmc.
+    //long long FirstMustFlashBlockSize = MB100;
+    long long FirstMustFlashBlockSize = 1;
+    // check the next stepSize, if it's all empty then skip this block (stepSize), otherwise this part need to flash
+    long long stepSize = 30 * MB1;
+
+    FILE *fp;
+
+    fp = fopen(imgfile.c_str(), "rb");
+    if (!fp)
     {
-        //block = new ContentBlock();
-        // block->start = i * 10;
-        block.start = i * 10;
-        // block->len = i * 10 + i * 5;
-        block.len = i * 10 + i * 5;
-
-        result->push_back(block);
+        cout << "File can not ben opened ?? " << imgfile.c_str();
+        return NULL;
     }
+    long long  totalFileSize = 0;
+    _fseeki64(fp, 0, SEEK_END);
+    totalFileSize = _ftelli64(fp);
+
+    if (totalFileSize == 0) {
+        fclose(fp);
+        cout << "error, image file size is 0";
+        return NULL;
+    }
+    if (totalFileSize < 0)
+    {
+        fclose(fp);
+        cout << "error, image file size is invalid";
+        return NULL;
+    }
+    cout << "file size is " << totalFileSize << endl;
+    _fseeki64(fp, 0, SEEK_SET);
+
+    std::vector<DataBlock> *result = new std::vector<DataBlock>();
+
+    long long doneAddress = 0;
+
+    if(totalFileSize<=  FirstMustFlashBlockSize)
+    {
+       DataBlock block;
+
+       //the file is too small, smaller than the must flash block
+       //so just return 0 to totalFileSize
+       block.start=0;
+       block.len = totalFileSize;
+       result->push_back(block);
+       return result;
+    }
+    
+    doneAddress = FirstMustFlashBlockSize;
+    
+    DataBlock *datablock = findDataBlock(fp, doneAddress+1, totalFileSize);
+    result->push_back(*datablock);
+
+    fclose(fp);
+ 
     return result;
 }
 
 
 int main()
 {
-
-
     string filenameIn = "d:\\in.txt";
     string filenameOut = "d:\\out.txt";
-    string imageFile = "diskimage.txt";
+    string imageFile = "d:\\diskimage.txt";
 
-    std::vector<ContentBlock> *result= 
-    analyzeDiskImageFile(imageFile );
-    if (!result) { cout << " result is null";  return 1; }
-
-    ContentBlock block;
-    int i;
-    for (i = 0; i < result->size();i++)
+    std::vector<DataBlock> *result = analyzeDiskImageFile(imageFile);
+    if (!result) { cout << " result is null";   cin.get();  return 1; }
+ 
+    for (int i = 0; i < result->size(); i++)
     {
-       
-        cout << "start " << result->at(i).start << "   " << "len: " << result->at(i).len << endl;
+        cout << "block:"<<i<<"  start: " << result->at(i).start << "  " << "len: " << result->at(i).len << endl;
     }
 
     delete result;
