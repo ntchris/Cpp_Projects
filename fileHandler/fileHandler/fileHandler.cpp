@@ -285,10 +285,11 @@ std::vector<DataBlock> *  analyzeDiskImageFile(string imgfile, const long long h
           {
              // found the head of data block!
              block.start= checkStartingAddress;
-             checkStartingAddress += readAndTestBlockSize;
              blocklen = readAndTestBlockSize;
 
-          }
+          } 
+         checkStartingAddress += readAndTestBlockSize;
+          
 
          if(checkStartingAddress >= totalFileSize)
           {
@@ -536,13 +537,87 @@ void doTestFile3()
 }
 
 
+
+void doTestFile4()
+{
+   char  buffer[] = { 1,0,0,0,1,1 };
+   string filename = "d:\\doTestFile4";
+   FILE *fp = fopen(filename.c_str(), "wb");
+   fwrite(buffer, sizeof(buffer), 1, fp);
+   fclose(fp);
+   std::vector<DataBlock> *expected_result;
+   expected_result = new std::vector<DataBlock>();
+   expected_result->push_back({ 0, 1 });
+   expected_result->push_back({ 3, 3  });
+
+   DataBlock block;
+   block.start = 0;
+   block.len = 0;
+   long long headerBlockSize = 1;
+   long long dataBlockSize = 2;
+   bool pass = doTest(filename, headerBlockSize, dataBlockSize, expected_result);
+
+}
+
+
+
+
+void doTestFile5()
+{
+   //char  buffer[] = { 1,0,0,0,1,1,0,0,0,0 };
+   char  buffer[] = { 1,0,0,1,0,0,0,0 };
+   string filename = "d:\\doTestFile5";
+   FILE *fp = fopen(filename.c_str(), "wb");
+   fwrite(buffer, sizeof(buffer), 1, fp);
+   fclose(fp);
+   std::vector<DataBlock> *expected_result;
+   expected_result = new std::vector<DataBlock>();
+   expected_result->push_back({ 0, 1 });
+   expected_result->push_back({ 3, 2 });
+
+   DataBlock block;
+   block.start = 0;
+   block.len = 0;
+   long long headerBlockSize = 1;
+   long long dataBlockSize = 2;
+   bool pass = doTest(filename, headerBlockSize, dataBlockSize, expected_result);
+
+}
+
+
+
+void doTestFile6()
+{
+   char  buffer[] = { 1,0,0,0,1,1,0,0,0,0 };
+    string filename = "d:\\doTestFile6";
+   FILE *fp = fopen(filename.c_str(), "wb");
+   fwrite(buffer, sizeof(buffer), 1, fp);
+   fclose(fp);
+   std::vector<DataBlock> *expected_result;
+   expected_result = new std::vector<DataBlock>();
+   expected_result->push_back({ 0, 1 });
+   expected_result->push_back({ 3, 4 });
+
+   DataBlock block;
+   block.start = 0;
+   block.len = 0;
+   long long headerBlockSize = 1;
+   long long dataBlockSize = 2;
+   bool pass = doTest(filename, headerBlockSize, dataBlockSize, expected_result);
+
+}
 void test()
 {
+   doTestFile6();
+
+   doTestFile5();
+   doTestFile4();
    doTestAllEmptyFile();
    doTestFile1();
    doTestFile2();
    doTestFile3();
    doTestAllFullFile();
+   
 }
 
 
