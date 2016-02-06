@@ -606,6 +606,25 @@ void doTestFile6()
    bool pass = doTest(filename, headerBlockSize, dataBlockSize, expected_result);
 
 }
+
+
+
+void doTestFileAvi()
+{
+   
+   std::vector<DataBlock> *expected_result;
+   expected_result = new std::vector<DataBlock>();
+   
+
+   DataBlock block;
+   block.start = 0;
+   block.len = 0;
+   long long headerBlockSize = 20000;
+   long long dataBlockSize = 4000;
+   bool pass = doTest("d:\\out.avi", headerBlockSize, dataBlockSize, expected_result);
+
+}
+
 void test()
 {
    doTestFile6();
@@ -617,6 +636,7 @@ void test()
    doTestFile2();
    doTestFile3();
    doTestAllFullFile();
+   doTestFileAvi();
    
 }
 
