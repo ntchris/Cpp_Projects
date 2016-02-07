@@ -15,8 +15,8 @@
 
 using namespace std;
 
-const long long MB1 = 1024 * 1024;
-const long long MB10 = 10 * MB1;
+const long long MB1 = (long long )1024 * 1024;
+const long long MB10 = (long long )10 * MB1;
 const long long MB100 = 100 * MB1;
 
 
@@ -82,15 +82,16 @@ struct DataBlock
 
 
 
-bool isBufferAllZero(char *buffer, long long size)
+bool isBufferAllZero(char *buffer, unsigned int size)
 {
    if(!buffer) 
    {
       cout<< "buffer is null pointer"<<endl; 
       return true;
    }
-   for(int i=0;i<size;i++)
+   for(unsigned   i=0;i<size;i++)
    {
+      //printf("%d ", buffer[i]);
       if(buffer[i]!=0)
       {
          //it's not zero, immediately return false
@@ -172,13 +173,15 @@ DataBlock * zfindDataBlock(FILE*fp, const long long start, const long long total
 
 bool isEmptyBlock(FILE *fp, long long readAndTestBlockSize)
 {
-
-   const unsigned smallStepSize=0xff;
-   unsigned leftSize= readAndTestBlockSize%smallStepSize;
+   //const unsigned smallStepSize=0xffff;
+   unsigned int smallStepSize=0xffff;
+   unsigned int leftSize= 0;
+   leftSize = readAndTestBlockSize%smallStepSize; 
    long long loopTime= readAndTestBlockSize/ smallStepSize;
    char *buffer = new char[smallStepSize];
+   memset(buffer,0, smallStepSize);
 
-   for(int i=0;i<=loopTime;i++)
+   for(long long i=0;i<=loopTime;i++)
    {
       unsigned toReadSize=0;
       if(i<loopTime)
@@ -197,7 +200,9 @@ bool isEmptyBlock(FILE *fp, long long readAndTestBlockSize)
 
       if (!isBufferAllZero(buffer, toReadSize))
       {
+         
          //it is not all zero in this block
+         delete buffer;
          return false;
       }
 
@@ -209,7 +214,7 @@ bool isEmptyBlock(FILE *fp, long long readAndTestBlockSize)
 }
 
 
-std::vector<DataBlock> *  analyzeDiskImageFile(string imgfile, const long long headerBlock, const long long dataBlockSize)
+std::vector<DataBlock> *  v1_working_analyzeDiskImageFile(string imgfile, const long long headerBlock, const long long dataBlockSize)
 {
    // DD first block: 0 to 100 MB, do not analyze if it's empty or not, just write this block to emmc.
     //long long FirstMustFlashBlockSize = MB100;
@@ -288,8 +293,10 @@ std::vector<DataBlock> *  analyzeDiskImageFile(string imgfile, const long long h
              blocklen = readAndTestBlockSize;
 
           } 
+
          checkStartingAddress += readAndTestBlockSize;
-          
+         _fseeki64(fp, checkStartingAddress, SEEK_SET);
+
 
          if(checkStartingAddress >= totalFileSize)
           {
@@ -325,6 +332,7 @@ std::vector<DataBlock> *  analyzeDiskImageFile(string imgfile, const long long h
 
              }
              checkStartingAddress += readAndTestBlockSize;
+             _fseeki64(fp, checkStartingAddress, SEEK_SET);
 
              if (checkStartingAddress >= totalFileSize)
              {
@@ -354,6 +362,164 @@ std::vector<DataBlock> *  analyzeDiskImageFile(string imgfile, const long long h
 }
 
 
+
+
+
+
+std::vector<DataBlock> *  analyzeDiskImageFile2(string imgfile, const long long headerBlock, const long long dataBlockSize)
+{
+   // DD first block: 0 to 100 MB, do not analyze if it's empty or not, just write this block to emmc.
+   //long long FirstMustFlashBlockSize = MB100;
+   // check the next stepSize, if it's all empty then skip this block (stepSize), otherwise this part need to flash
+   FILE *fp;
+   const int NOTINIT = -1;
+   fp = fopen(imgfile.c_str(), "rb");
+   if (!fp)
+   {
+      cout << "File can not ben opened ?? " << imgfile.c_str();
+      return NULL;
+   }
+   long long  totalFileSize = 0;
+   _fseeki64(fp, 0, SEEK_END);
+   totalFileSize = _ftelli64(fp);
+
+   if (totalFileSize == 0) {
+      fclose(fp);
+      cout << "error, image file size is 0";
+      return NULL;
+   }
+   if (totalFileSize < 0)
+   {
+      fclose(fp);
+      cout << "error, image file size is invalid";
+      return NULL;
+   }
+
+
+   std::vector<DataBlock> *result = new std::vector<DataBlock>();
+
+   long long checkStartingAddress = 0;
+   DataBlock block;
+   if (totalFileSize <= headerBlock)
+   {
+      //the file is too small, smaller than the must flash block
+      //so just return 0 to totalFileSize
+      block.start = 0;
+      block.len = totalFileSize;
+      result->push_back(block);
+      return result;
+   }
+   else
+   {
+      //the first block, start is 0, len is unknown yet.
+      block.start = 0;
+      block.len = 0;
+      //block.len = FirstMustFlashBlockSize;
+      //result->push_back(block);
+   }
+
+   checkStartingAddress = headerBlock;
+   _fseeki64(fp, checkStartingAddress, SEEK_SET);
+
+   //DataBlock *datablock = findDataBlock(fp, doneAddress+1, totalFileSize);
+   //result->push_back(*datablock);
+
+   long long blocklen = headerBlock;
+
+   do {
+      long long  readAndTestBlockSize = 0;
+      // get the testReadSize for next loop, 
+      if ((checkStartingAddress + dataBlockSize)> totalFileSize)
+      {   // only has a little left, just read what's left
+         readAndTestBlockSize = totalFileSize - checkStartingAddress;
+      }
+      else
+      {  //still have a lot of to read, read the full step size
+         readAndTestBlockSize = dataBlockSize;
+      }
+      if (block.start == NOTINIT)
+      {
+         // searching for head of data block
+         if (!isEmptyBlock(fp, readAndTestBlockSize))
+         {
+            // found the head of data block!
+            block.start = checkStartingAddress;
+            blocklen = readAndTestBlockSize;
+
+         }
+
+         checkStartingAddress += readAndTestBlockSize;
+         _fseeki64(fp, checkStartingAddress, SEEK_SET);
+
+
+         if (checkStartingAddress >= totalFileSize)
+         {
+            // this is the last block of the file. time to set data and stop reading.
+
+            if (block.start == NOTINIT)
+            {
+               break;
+            }
+            else {
+               block.len = blocklen;
+               result->push_back(block);
+               break;
+            }
+         }
+
+      }
+      else
+      {
+         // searching for end of data block
+
+         if (isEmptyBlock(fp, readAndTestBlockSize))
+         {
+            // found the end of this block           
+
+            //record this data block, prepare for next data block
+            block.len = blocklen;
+            result->push_back(block);
+            block.start = NOTINIT;
+            block.len = 0;
+
+         }
+         else
+         {  // it's not empty
+            blocklen += readAndTestBlockSize;
+
+         }
+         checkStartingAddress += readAndTestBlockSize;
+         _fseeki64(fp, checkStartingAddress, SEEK_SET);
+
+         if (checkStartingAddress >= totalFileSize)
+         {
+            //end of file. 
+            if (block.start != NOTINIT)
+            {
+               block.len = blocklen;
+               //record this data block, prepare for next data block
+               result->push_back(block);
+               block.start = NOTINIT;
+               block.len = 0;
+            }
+            break;
+         }
+
+      }
+
+      if (checkStartingAddress >= totalFileSize)
+      {
+         break;
+      }
+   } while (true);
+
+   fclose(fp);
+
+   return result;
+}
+
+
+
 void showDataBlockList(std::vector<DataBlock> * datablockVector)
 {
    if(datablockVector==NULL)
@@ -361,7 +527,7 @@ void showDataBlockList(std::vector<DataBlock> * datablockVector)
       cout<< "NULL";
    }
     
-   for (int i = 0; i < datablockVector->size(); i++)
+   for (unsigned int i = 0; i < datablockVector->size(); i++)
    {
       cout << "block:" << i << "  start: " << datablockVector->at(i).start << "  " << "len: " << datablockVector->at(i).len << endl;
    }
@@ -398,7 +564,7 @@ bool doTest(string file, long long headerBlockSize, long long dataBlockSize, std
 
    }
 
-    for(int i=0;i< expected_result->size();i++)
+    for(unsigned int i=0;i< expected_result->size();i++)
    {
       if(expected_result->at(i).start != actual_result->at(i).start  || expected_result->at(i).len != actual_result->at(i).len)
       {
@@ -430,7 +596,7 @@ void doTestAllEmptyFile()
 {
    string filename ="d:\\doTestAllEmptyFile";
    FILE *fp=fopen(filename.c_str(), "wb");
-   long long size = 3;
+   int size = 3;
    char *buffer=new char[size];
    memset(buffer,0, size);
 
@@ -454,7 +620,7 @@ void doTestAllFullFile()
 {
    string filename = "d:\\doTestAllFullFile";
    FILE *fp = fopen(filename.c_str(), "wb");
-   long long size = 5;
+   int size = 5;
    char *buffer = new char[size];
    memset(buffer, 1, size);
 
@@ -625,9 +791,30 @@ void doTestFileAvi()
 
 }
 
+
+
+ 
+void doTestFileDiskImage()
+{
+   
+   std::vector<DataBlock> *expected_result;
+   expected_result = new std::vector<DataBlock>();
+   
+
+   DataBlock block;
+   block.start = 0;
+   block.len = 0;
+   // long long headerBlockSize = 3833561088;
+   long long headerBlockSize = 5*MB10;
+   long long dataBlockSize = (long long ) 5 * MB10;
+   bool pass = doTest("d:\\diskimage.p1.img", headerBlockSize, dataBlockSize, expected_result);
+
+}  
 void test()
 {
-   doTestFile6();
+
+   doTestFileDiskImage();
+  /* doTestFile6();
 
    doTestFile5();
    doTestFile4();
@@ -637,6 +824,7 @@ void test()
    doTestFile3();
    doTestAllFullFile();
    doTestFileAvi();
+   */
    
 }
 
@@ -665,7 +853,7 @@ int main()
     std::vector<DataBlock> *result = analyzeDiskImageFile(filenameIn, headerBlock, DataBlockSize);
     if (!result) { cout << " result is null";   cin.get();  return 1; }
  
-    for (int i = 0; i < result->size(); i++)
+    for (unsigned int i = 0; i < result->size(); i++)
     {
         cout << "block:"<<i<<"  start: " << result->at(i).start << "  " << "len: " << result->at(i).len << endl;
     }
