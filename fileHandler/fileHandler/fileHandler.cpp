@@ -366,7 +366,7 @@ std::vector<DataBlock> *  v1_working_analyzeDiskImageFile(string imgfile, const 
 
 
 
-std::vector<DataBlock> *  analyzeDiskImageFile2(string imgfile, const long long headerBlock, const long long dataBlockSize)
+std::vector<DataBlock> *  analyzeDiskImageFile(string imgfile, const long long headerBlock, const long long dataBlockSize)
 {
    // DD first block: 0 to 100 MB, do not analyze if it's empty or not, just write this block to emmc.
    //long long FirstMustFlashBlockSize = MB100;
@@ -421,10 +421,8 @@ std::vector<DataBlock> *  analyzeDiskImageFile2(string imgfile, const long long 
    checkStartingAddress = headerBlock;
    _fseeki64(fp, checkStartingAddress, SEEK_SET);
 
-   //DataBlock *datablock = findDataBlock(fp, doneAddress+1, totalFileSize);
-   //result->push_back(*datablock);
-
-   long long blocklen = headerBlock;
+   //the first data block, at this time is not over, we don't know the len of it yet
+   block.len = headerBlock;
 
    do {
       long long  readAndTestBlockSize = 0;
@@ -437,78 +435,56 @@ std::vector<DataBlock> *  analyzeDiskImageFile2(string imgfile, const long long 
       {  //still have a lot of to read, read the full step size
          readAndTestBlockSize = dataBlockSize;
       }
-      if (block.start == NOTINIT)
+
+      if(!isEmptyBlock(fp, readAndTestBlockSize) )
       {
-         // searching for head of data block
-         if (!isEmptyBlock(fp, readAndTestBlockSize))
-         {
-            // found the head of data block!
+         // not empty block
+         if (block.start == NOTINIT)
+         {   // found the head of data block!
             block.start = checkStartingAddress;
-            blocklen = readAndTestBlockSize;
-
-         }
-
-         checkStartingAddress += readAndTestBlockSize;
-         _fseeki64(fp, checkStartingAddress, SEEK_SET);
-
-
-         if (checkStartingAddress >= totalFileSize)
+            block.len = readAndTestBlockSize;
+         }else
          {
-            // this is the last block of the file. time to set data and stop reading.
+            // searching for end of data block
+            block.len += readAndTestBlockSize;
 
-            if (block.start == NOTINIT)
-            {
-               break;
-            }
-            else {
-               block.len = blocklen;
-               result->push_back(block);
-               break;
-            }
          }
 
-      }
-      else
+      }else
       {
-         // searching for end of data block
+         // it's empty block
 
-         if (isEmptyBlock(fp, readAndTestBlockSize))
+
+         if (block.start != NOTINIT)
          {
-            // found the end of this block           
-
-            //record this data block, prepare for next data block
-            block.len = blocklen;
-            result->push_back(block);
+            //met an empty block, this data block is over.
+             result->push_back(block);
             block.start = NOTINIT;
             block.len = 0;
-
-         }
-         else
-         {  // it's not empty
-            blocklen += readAndTestBlockSize;
-
-         }
-         checkStartingAddress += readAndTestBlockSize;
-         _fseeki64(fp, checkStartingAddress, SEEK_SET);
-
-         if (checkStartingAddress >= totalFileSize)
-         {
-            //end of file. 
-            if (block.start != NOTINIT)
-            {
-               block.len = blocklen;
-               //record this data block, prepare for next data block
-               result->push_back(block);
-               block.start = NOTINIT;
-               block.len = 0;
-            }
-            break;
-         }
-
+         } 
+       
       }
+
+      checkStartingAddress += readAndTestBlockSize;
+      _fseeki64(fp, checkStartingAddress, SEEK_SET);
+
+      
 
       if (checkStartingAddress >= totalFileSize)
       {
+         //met the end of file. before we quit, need to check the current work status
+      
+         if (block.start != NOTINIT)
+         {
+            //already met the end of file, but we only have block start , no len yet
+             
+            //record this data block, prepare for next data block
+            result->push_back(block);
+         }else
+         {
+            // block.start is NOTINIT
+            // so it means the job is done the last block is empty, the previous block is already saved, we can just quit.
+         }
          break;
       }
    } while (true);
@@ -799,12 +775,13 @@ void doTestFileDiskImage()
    
    std::vector<DataBlock> *expected_result;
    expected_result = new std::vector<DataBlock>();
-   
+    
+   expected_result->push_back({ 0, 104857600 });
+   expected_result->push_back({ 576716800, 104857600 });
+   expected_result->push_back({ 1101004800, 52428800 });
+   expected_result->push_back({ 3827302400,  6291456 });
 
-   DataBlock block;
-   block.start = 0;
-   block.len = 0;
-   // long long headerBlockSize = 3833561088;
+
    long long headerBlockSize = 5*MB10;
    long long dataBlockSize = (long long ) 5 * MB10;
    bool pass = doTest("d:\\diskimage.p1.img", headerBlockSize, dataBlockSize, expected_result);
@@ -813,18 +790,24 @@ void doTestFileDiskImage()
 void test()
 {
 
-   doTestFileDiskImage();
-  /* doTestFile6();
+   doTestFile1();
+
+
+  
+   doTestFile6();
 
    doTestFile5();
    doTestFile4();
-   doTestAllEmptyFile();
-   doTestFile1();
    doTestFile2();
    doTestFile3();
    doTestAllFullFile();
    doTestFileAvi();
-   */
+   doTestFileDiskImage();
+
+
+   doTestAllEmptyFile();
+
+   
    
 }
 
