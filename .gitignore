@@ -47,3 +47,4 @@ Debug
 .obj
 ipch
 *.opensdf
+.suo
