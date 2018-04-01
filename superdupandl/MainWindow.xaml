@@ -7,7 +7,7 @@
         xmlns:Properties="clr-namespace:superdupandl.Properties" x:Class="superdupandl.DupanFileListWindow"
         mc:Ignorable="d"
         Title="Super DuPan Downloader V0.1  " Height="900" Width="1280"   >
-    
+
 
    <Window.Resources>
       <!--  <TargetType="{x:Type ListViewItem}">
@@ -23,8 +23,12 @@
       <BitmapImage x:Key="downloadImage" UriSource="resources/download.png" />
       <BitmapImage x:Key="defaultProfileImage" UriSource="resources/profile.jpg" />
       <BitmapImage x:Key="folderImage" UriSource="resources/folder.png" />
+      <BitmapImage x:Key="fileImage" UriSource="resources/file.png" />
+      <BitmapImage x:Key="returnImage" UriSource="resources/return.png" />
 
-      <DataTemplate x:Key="celltemp_checkbox">
+      <DataTemplate x:Key="celltemp_checkbox" >
+
+
          <CheckBox HorizontalAlignment="Center" IsChecked="{Binding IsSelected,    RelativeSource= {RelativeSource AncestorType=ListViewItem} }" 
                   Margin="0,1,1,1" >
          </CheckBox>
@@ -32,24 +36,31 @@
 
       <DataTemplate x:Key="celltemp_filename">
          <StackPanel  Orientation="Horizontal"     >
-            <Image  Source="{StaticResource folderImage}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill"    />
-            <TextBlock HorizontalAlignment="Left" TextBlock.Text ="{Binding  filename}" VerticalAlignment="Center" />  
-            
+            <Image  Source="{StaticResource fileImage}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Margin="5"    />
+            <TextBlock HorizontalAlignment="Left" TextBlock.Text ="{Binding  filename}" VerticalAlignment="Center" Padding="8,0,0,0" />
+
          </StackPanel>
       </DataTemplate>
 
       <DataTemplate x:Key="celltemp_size"  >
-         
-            <TextBlock  FontSize="16"  TextAlignment="Center"  Text ="{Binding  size}" VerticalAlignment="Stretch"  />
-            
+
+         <TextBlock  FontSize="16"  TextAlignment="Center"  Text ="{Binding  size}" VerticalAlignment="Stretch"  />
+
 
       </DataTemplate>
 
 
       <DataTemplate x:Key="celltemp_datetime">
-         
-            <TextBlock HorizontalAlignment="Stretch" TextAlignment="Center"  FontSize="14" TextBlock.Text ="{Binding  datetime}" VerticalAlignment="Stretch"  />
-         
+
+         <TextBlock HorizontalAlignment="Stretch" TextAlignment="Center"  FontSize="14" TextBlock.Text ="{Binding  datetime}" VerticalAlignment="Stretch"  />
+
+      </DataTemplate>
+
+      <DataTemplate x:Key="celltemp_pathSelectorItem">
+         <StackPanel  Orientation="Horizontal"     >
+            <TextBlock HorizontalAlignment="Left" TextBlock.Text ="{Binding  foldername}" VerticalAlignment="Center" Padding="8,0,0,0" />
+            <TextBlock HorizontalAlignment="Left" TextBlock.Text =">" VerticalAlignment="Center" Padding="8,0,0,0" />
+         </StackPanel>
       </DataTemplate>
 
 
@@ -91,7 +102,7 @@
                   <Button x:Name="button_dupan"  Margin="10,10,10,10" Height="60"  >
                      <StackPanel Orientation="Horizontal" >
                         <TextBlock Text=  "  我的网盘  "  HorizontalAlignment="Center" VerticalAlignment="Center"  FontSize="20" IsEnabled="False"  >
-                           
+
                         </TextBlock>
                      </StackPanel>
                   </Button>
@@ -121,7 +132,23 @@
 
          <Border BorderBrush="Black" BorderThickness="1"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="50" DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" Margin="0">
-               <Button x:Name="buttonRefresh"  Margin="100,5"  >
+
+               <Button x:Name="buttonReturn"   Margin="10,5">
+                  <Button.ToolTip>
+                     <TextBlock FontSize="16">返回网盘上层目录</TextBlock>
+                  </Button.ToolTip>
+                  <StackPanel Orientation="Horizontal" >
+                     <Image Margin="3" Source="{StaticResource returnImage  }" />
+                     <TextBlock FontSize="15" Text=" 返回上层  " HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  </StackPanel>
+               </Button>
+
+
+               <Button x:Name="buttonRefresh"  Margin="10,5"  >
+
+                  <Button.ToolTip>
+                     <TextBlock FontSize="16">刷新网盘文件列表. (否则继续用本地缓存的列表, 速度较快, 但万一网盘文件被修改删除则文件列表会不一致) </TextBlock>
+                  </Button.ToolTip>
 
                   <StackPanel Orientation="Horizontal" >
                      <!--   
@@ -134,57 +161,89 @@
                      -->
                      <Image Margin="5,0"   Source="{StaticResource  refreshImage }" />
 
-                     <TextBlock Text="  刷新     " HorizontalAlignment="Center" VerticalAlignment="Center"  FontSize="15" Margin="5,0"  />
+                     <TextBlock Text=" 刷新  " HorizontalAlignment="Center" VerticalAlignment="Center"  FontSize="15" Margin="5,0"  />
                   </StackPanel>
                </Button>
 
 
-               <Button x:Name="buttonDownload"   Margin="50,5"  >
-
+               <Button x:Name="buttonDownload"   Margin="10,5" Click="buttonDownload_Click"  >
+                  <Button.ToolTip>
+                     <TextBlock FontSize="16">下载选中的文件</TextBlock>
+                  </Button.ToolTip>
                   <StackPanel Orientation="Horizontal" >
                      <Image Margin="5,0" Source="{StaticResource downloadImage }"  />
-                     <TextBlock Text="    下载    " HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"  />
+                     <TextBlock Text="  下载    " HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"  />
                   </StackPanel>
                </Button>
 
-               <!--  
-               <Button x:Name="buttonSetting"   Margin="10,5">
-               <StackPanel Orientation="Horizontal" >
-                  <Image Margin="3" Source="pack://application:,,,/Resources/setting.png"  />
-                  <TextBlock Text="  Setting  " HorizontalAlignment="Center" VerticalAlignment="Center"/>
-               </StackPanel>
-               </Button>
-               -->
             </StackPanel>
-
-
 
          </Border>
 
 
-         <ListView x:Name="listView" Margin="1,1,1,1"   FontSize="18"  >
 
-         <!--  important , must have this to make cell item alignment work  -->
-            <ListView.ItemContainerStyle >            
-               <Style TargetType="ListViewItem" >                   
+         <ListView x:Name="listview_pathSelector" Height="50"   HorizontalAlignment="Stretch" FontSize="16" DockPanel.Dock="Top" Margin="0,0,0,0" >
+            
+             
+            <!--   let the listview items (folders) layout horizontally  -->
+            <ListView.ItemsPanel>               
+               <ItemsPanelTemplate>                  
+                  <StackPanel Orientation="Horizontal"></StackPanel>              
+               </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+
+            <!-- hide the listview 's column header -->
+            <ListView.Resources>
+               <Style TargetType="GridViewColumnHeader">
+                  <Setter Property="Visibility" Value="Collapsed" />
+               </Style>
+            </ListView.Resources>
+
+            <ListView.View>
+               <GridView >
+                  <GridViewColumn Header="" CellTemplate="{StaticResource  celltemp_pathSelectorItem}"/>
+               </GridView>
+            </ListView.View>
+         </ListView>
+
+
+         <!-- the main listview , for filelist -->
+         <ListView x:Name="listView_fileList" Margin="1,1,1,1"   FontSize="18"   >
+            <ListView.ToolTip>
+               <TextBlock FontSize="16">Select file to download, hold shift to multi-select</TextBlock>
+            </ListView.ToolTip>
+
+            <!--  important , must have this to make cell item alignment work  -->
+            <ListView.ItemContainerStyle >
+               <Style TargetType="ListViewItem" >
                   <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                   <Setter Property="Height" Value="40" />
+                  <Setter Property="Height" Value="40" />
                </Style>
             </ListView.ItemContainerStyle>
-         <!--  important , must have this to make cell item alignment work  -->
+            <!--  important , must have this to make cell item alignment work  -->
 
-
+                
 
             <ListView.View>
                <GridView>
 
-                  <GridViewColumn  CellTemplate="{StaticResource celltemp_checkbox}">
-                      <CheckBox x:Name="checkBoxAll"/>
+                  <GridViewColumn    CellTemplate="{StaticResource celltemp_checkbox}"   >
+
+                     <CheckBox x:Name="checkBoxAll" Margin="10,3"  Unchecked="checkBoxAll_unchecked" Checked="checkBoxAll_Checked">
+                        <CheckBox.ToolTip>
+                           <TextBlock FontSize="16">选择或不选择当前目录的全部文件</TextBlock>
+                        </CheckBox.ToolTip>
+                        
+                     </CheckBox>
+
+
                   </GridViewColumn >
 
 
                   <GridViewColumn  Width="700" CellTemplate="{StaticResource celltemp_filename}">
-                     <GridViewColumnHeader Margin="58,0,0,0"  HorizontalContentAlignment="Left">文件列表</GridViewColumnHeader>
+                     <GridViewColumnHeader    HorizontalContentAlignment="Left">
+                        <TextBlock Margin="20,0,0,0"> 文件列表 </TextBlock>
+                     </GridViewColumnHeader>
                   </GridViewColumn>
 
                   <!--
@@ -195,11 +254,11 @@
                   <GridViewColumn Header="大小" Width="150"  CellTemplate="{StaticResource celltemp_size}"  />
 
 
-                  <GridViewColumn Header="日期" Width="150"  CellTemplate="{StaticResource celltemp_datetime}" />   
+                  <GridViewColumn Header="日期" Width="150"  CellTemplate="{StaticResource celltemp_datetime}" />
                </GridView>
             </ListView.View>
 
-          
+
 
          </ListView>
 

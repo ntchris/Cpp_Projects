@@ -17,8 +17,8 @@
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\WindowsBase\v4.0_4.0.0.0__31bf3856ad364e35\WindowsBase.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_32\PresentationCore\v4.0_4.0.0.0__31bf3856ad364e35\PresentationCore.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework\v4.0_4.0.0.0__31bf3856ad364e35\PresentationFramework.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
-The thread 0x3e44 has exited with code 0 (0x0).
-The thread 0x2820 has exited with code 0 (0x0).
+The thread 0x40a8 has exited with code 0 (0x0).
+The thread 0xbec has exited with code 0 (0x0).
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'D:\gitHubRoot\Cpp_Projects\superdupandl\bin\Debug\superdupandl.exe'. Symbols loaded.
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\System.Configuration\v4.0_4.0.0.0__b03f5f7f11d50a3a\System.Configuration.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
 Step into: Stepping over non-user code 'superdupandl.App..ctor'
@@ -33,26 +33,21 @@ Step into: Stepping over non-user code 'superdupandl.App.InitializeComponent'
 7
 8
 9
+!!!!
+remotePath_0
+!!!!
+remotePath_1
+!!!!
+remotePath_2
+!!!!
+remotePath_3
+!!!!
+remotePath_4
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework.Aero2\v4.0_4.0.0.0__31bf3856ad364e35\PresentationFramework.Aero2.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
-'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\Users\chris\AppData\Local\Temp\VisualStudio.XamlDiagnostics.12168\WpfXamlDiagnosticsTap.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
+'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\Users\chris\AppData\Local\Temp\VisualStudio.XamlDiagnostics.11568\WpfXamlDiagnosticsTap.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\assembly\GAC\Microsoft.VisualStudio.OLE.Interop\7.1.40304.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.OLE.Interop.dll'. Module was built without symbols.
-'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework-SystemXml\v4.0_4.0.0.0__b77a5c561934e089\PresentationFramework-SystemXml.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
-'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework-SystemXmlLinq\v4.0_4.0.0.0__b77a5c561934e089\PresentationFramework-SystemXmlLinq.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
-'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework-SystemCore\v4.0_4.0.0.0__b77a5c561934e089\PresentationFramework-SystemCore.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=34498751)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=34498751); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=30834295)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=30834295); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=8223052)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=8223052); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=23804398)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=23804398); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=53461032)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=53461032); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=58465333)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=58465333); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=21106248)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=21106248); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=39580681)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=39580681); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=28436463)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=28436463); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
-System.Windows.Data Error: 40 : BindingExpression path error: 'celltemp_datetime' property not found on 'object' ''ToDownloadFileItem' (HashCode=44227181)'. BindingExpression:Path=celltemp_datetime; DataItem='ToDownloadFileItem' (HashCode=44227181); target element is 'TextBlock' (Name=''); target property is 'Text' (type 'String')
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework-SystemData\v4.0_4.0.0.0__b77a5c561934e089\PresentationFramework-SystemData.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\System.Numerics\v4.0_4.0.0.0__b77a5c561934e089\System.Numerics.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
+'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework-SystemXmlLinq\v4.0_4.0.0.0__b77a5c561934e089\PresentationFramework-SystemXmlLinq.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
+'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\PresentationFramework-SystemXml\v4.0_4.0.0.0__b77a5c561934e089\PresentationFramework-SystemXml.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
 'superdupandl.vshost.exe' (CLR v4.0.30319: superdupandl.vshost.exe): Loaded 'C:\WINDOWS\Microsoft.Net\assembly\GAC_MSIL\UIAutomationTypes\v4.0_4.0.0.0__31bf3856ad364e35\UIAutomationTypes.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
-The thread 0x3334 has exited with code 0 (0x0).
-The thread 0xaac has exited with code 0 (0x0).
-The thread 0x38d8 has exited with code 0 (0x0).
-The program '[12168] superdupandl.vshost.exe' has exited with code 0 (0x0).
